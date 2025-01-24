@@ -89,23 +89,7 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
 //                    e.printStackTrace();
 //                }
 
-            else {
-                SendMessage message = SendMessage
-                        .builder()
-                        .chatId(chat_id)
-                        .text(answer)
-                        .build();
 
-                try {
-                    telegramClient.execute(message);
-                } catch (TelegramApiException e) {
-                    log.info("Ошибка при отправке сообщения пользователю");
-                    e.printStackTrace();
-                }
-            }
         }
     }
-
-
-
 }
