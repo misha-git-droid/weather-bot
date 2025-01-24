@@ -16,8 +16,6 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
 
     TelegramClient telegramClient = new OkHttpTelegramClient(System.getenv("BOT_TOKEN"));
     Logger log = Logger.getLogger(WeatherBot.class.getName());
-    String city;
-    String weatherUrl = "https://api.openweathermap.org/data/2.5/weather?lat=57.09&lon=65.32&units=metric&lang=ru&appid=" + System.getenv("API_WEATHER_TOKEN");
     WeatherBotService weatherBotService;
     URL aUrl;
 
@@ -26,16 +24,34 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasMessage() && update.getMessage().hasText()) {
 
             long chat_id = update.getMessage().getChatId();
+
             weatherBotService = new WeatherBotService();
 
-            // сделать: если сообщение от пользователя пустое, то обработать как ошибку
             String messageFromUser = update.getMessage().getText();
 
-            if (messageFromUser.equals("/start")) {
+            String answer = "Неизвестная команда.\nВведите /help для отображения команд бота";
 
-                String answer = weatherBotService.jsonToPojo(weatherUrl, WeatherNow.class);
+            if (weatherBotService.isCity(messageFromUser)) {
+                String weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + messageFromUser + "&units=metric&lang=ru&appid=" + System.getenv("API_WEATHER_TOKEN");
 
-                // не получится отправить юзеру объект, надо его превратить перед отправкой в текстовый формат
+                try {
+                    answer = weatherBotService.jsonToPojo(weatherUrl, WeatherNow.class, messageFromUser);
+
+                } catch (NotFoundCityException e) {
+                    SendMessage message = SendMessage
+                            .builder()
+                            .chatId(chat_id)
+                            .text(e.getMessage())
+                            .build();
+
+                    try {
+                        telegramClient.execute(message);
+                    } catch (TelegramApiException a) {
+                        log.info("Ошибка при отправке сообщения пользователю");
+                        a.printStackTrace();
+                    }
+                }
+
                 SendMessage message = SendMessage
                         .builder()
                         .chatId(chat_id)
@@ -49,11 +65,35 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
                     e.printStackTrace();
                 }
 
-            } else {
+
+            }
+
+//            if (messageFromUser.equals("/start")) {
+//
+//                //String answer = weatherBotService.jsonToPojo(weatherUrl, WeatherNow.class);
+//
+//                String answer = "Добро пожаловать в бота прогноза погоды!\n" +
+//                        "Напишите город, погоду которого вы хотите узнать:";
+//
+//                // не получится отправить юзеру объект, надо его превратить перед отправкой в текстовый формат
+//                SendMessage message = SendMessage
+//                        .builder()
+//                        .chatId(chat_id)
+//                        .text(answer)
+//                        .build();
+//
+//                try {
+//                    telegramClient.execute(message);
+//                } catch (TelegramApiException e) {
+//                    log.info("Ошибка при отправке сообщения пользователю");
+//                    e.printStackTrace();
+//                }
+
+            else {
                 SendMessage message = SendMessage
                         .builder()
                         .chatId(chat_id)
-                        .text("Неизвестная команда.\nВведите /help для отображения команд бота")
+                        .text(answer)
                         .build();
 
                 try {
