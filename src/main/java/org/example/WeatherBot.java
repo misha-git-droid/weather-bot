@@ -2,9 +2,12 @@ package org.example;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdurmont.emoji.EmojiParser;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -17,7 +20,14 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
     TelegramClient telegramClient = new OkHttpTelegramClient(System.getenv("BOT_TOKEN"));
     Logger log = Logger.getLogger(WeatherBot.class.getName());
     WeatherBotService weatherBotService;
-    URL aUrl;
+    EmodjiService emodjiService;
+    WeatherTranslateService weatherTranslateService;
+
+    public WeatherBot(EmodjiService emodjiService, WeatherTranslateService weatherTranslateService) {
+        this.emodjiService = emodjiService;
+        this.weatherTranslateService = weatherTranslateService;
+    }
+
 
     @Override
     public void consume(Update update) {
@@ -25,71 +35,24 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
 
             long chat_id = update.getMessage().getChatId();
 
-            weatherBotService = new WeatherBotService();
+            weatherBotService = new WeatherBotService(telegramClient);
 
             String messageFromUser = update.getMessage().getText();
 
             String answer = "Неизвестная команда.\nВведите /help для отображения команд бота";
 
-            if (weatherBotService.isCity(messageFromUser)) {
-                String weatherUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + messageFromUser + "&units=metric&lang=ru&appid=" + System.getenv("API_WEATHER_TOKEN");
+            if (messageFromUser.equals("/start")) {
 
-                try {
-                    answer = weatherBotService.jsonToPojo(weatherUrl, WeatherNow.class, messageFromUser);
+                weatherBotService.sendMessage(chat_id, "Добро пожаловать в бот прогноза погоды!\nПрогноз погоды какого города вас интересует?");
 
-                } catch (NotFoundCityException e) {
-                    SendMessage message = SendMessage
-                            .builder()
-                            .chatId(chat_id)
-                            .text(e.getMessage())
-                            .build();
+            } else if (!messageFromUser.equals("/start")) {
 
-                    try {
-                        telegramClient.execute(message);
-                    } catch (TelegramApiException a) {
-                        log.info("Ошибка при отправке сообщения пользователю");
-                        a.printStackTrace();
-                    }
-                }
-
-                SendMessage message = SendMessage
-                        .builder()
-                        .chatId(chat_id)
-                        .text(answer)
-                        .build();
-
-                try {
-                    telegramClient.execute(message);
-                } catch (TelegramApiException e) {
-                    log.info("Ошибка при отправке сообщения пользователю");
-                    e.printStackTrace();
-                }
-
-
+                WeatherNow weatherNow = weatherBotService.getWeatherNow(messageFromUser, WeatherNow.class);
+                String emj = EmojiParser.parseToUnicode(emodjiService.getEmodji(weatherNow));
+                String translateWeather = weatherTranslateService.getTranslate(weatherNow);
+                answer = emj + " " + translateWeather + "\n" + weatherNow.getMain();
+                weatherBotService.sendMessage(chat_id, answer);
             }
-
-//            if (messageFromUser.equals("/start")) {
-//
-//                //String answer = weatherBotService.jsonToPojo(weatherUrl, WeatherNow.class);
-//
-//                String answer = "Добро пожаловать в бота прогноза погоды!\n" +
-//                        "Напишите город, погоду которого вы хотите узнать:";
-//
-//                // не получится отправить юзеру объект, надо его превратить перед отправкой в текстовый формат
-//                SendMessage message = SendMessage
-//                        .builder()
-//                        .chatId(chat_id)
-//                        .text(answer)
-//                        .build();
-//
-//                try {
-//                    telegramClient.execute(message);
-//                } catch (TelegramApiException e) {
-//                    log.info("Ошибка при отправке сообщения пользователю");
-//                    e.printStackTrace();
-//                }
-
-
         }
     }
 }

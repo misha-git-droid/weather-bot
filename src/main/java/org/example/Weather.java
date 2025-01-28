@@ -11,9 +11,6 @@ public class Weather {
     private String main;
     private String description;
 
-    public String toString() {
-        return "Основная информация: " + main + "\n" + "Описание: " + description;
-    }
 }
 
 
