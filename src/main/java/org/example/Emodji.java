@@ -36,11 +36,11 @@ public class Emodji {
         emodjiRain.put("heavy intensity rain", ":white_sun_behind_cloud_rain:");
         emodjiRain.put("very heavy rain", ":white_sun_behind_cloud_rain:");
         emodjiRain.put("extreme rain", ":white_sun_behind_cloud_rain:");
-        emodjiRain.put("freezing rain", "cloud_rain");
-        emodjiRain.put("light intensity shower rain", "cloud_rain");
-        emodjiRain.put("shower rain", "cloud_rain");
-        emodjiRain.put("heavy intensity shower rain", "cloud_rain");
-        emodjiRain.put("ragged shower rain", "cloud_rain");
+        emodjiRain.put("freezing rain", ":cloud_rain:");
+        emodjiRain.put("light intensity shower rain", ":cloud_rain:");
+        emodjiRain.put("shower rain", ":cloud_rain:");
+        emodjiRain.put("heavy intensity shower rain", ":cloud_rain:");
+        emodjiRain.put("ragged shower rain", ":cloud_rain:");
         //
         emodjiThunderstorm.put("thunderstorm with light rain", ":thunder_cloud_rain:");
         emodjiThunderstorm.put("thunderstorm with rain", ":thunder_cloud_rain:");

@@ -1,18 +1,10 @@
 package org.example;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.emoji.EmojiParser;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-
-import java.net.URL;
 import java.util.logging.Logger;
 
 public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
@@ -22,10 +14,12 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
     WeatherBotService weatherBotService;
     EmodjiService emodjiService;
     WeatherTranslateService weatherTranslateService;
+    AtmosphereService atmosphereService;
 
-    public WeatherBot(EmodjiService emodjiService, WeatherTranslateService weatherTranslateService) {
+    public WeatherBot(EmodjiService emodjiService, WeatherTranslateService weatherTranslateService, AtmosphereService atmosphereService) {
         this.emodjiService = emodjiService;
         this.weatherTranslateService = weatherTranslateService;
+        this.atmosphereService = atmosphereService;
     }
 
 
@@ -48,7 +42,9 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
             } else if (!messageFromUser.equals("/start")) {
 
                 WeatherNow weatherNow = weatherBotService.getWeatherNow(messageFromUser, WeatherNow.class);
+                atmosphereService.checkWeatherMain(weatherNow);
                 String emj = EmojiParser.parseToUnicode(emodjiService.getEmodji(weatherNow));
+
                 String translateWeather = weatherTranslateService.getTranslate(weatherNow);
                 answer = emj + " " + translateWeather + "\n" + weatherNow.getMain();
                 weatherBotService.sendMessage(chat_id, answer);

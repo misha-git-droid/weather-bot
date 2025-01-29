@@ -15,13 +15,13 @@ public class WeatherTranslateService {
         String main = weather.getMain();
 
         return switch (main) {
-            case "Thunderstorm" -> enToRuThunderstorm.get(description);
-            case "Drizzle" -> enToRuDrizzle.get(description);
-            case "Snow" -> enToRuSnow.get(description);
-            case "Rain" -> enToRuRain.get(description);
-            case "Atmosphere" -> enToRuAtmosphere.get(description);
-            case "Clear" -> enToRuClear.get(description);
-            case "Clouds" -> enToRuClouds.get(description);
+            case "Thunderstorm" -> weatherTranslate.enToRuThunderstorm.get(description);
+            case "Drizzle" -> weatherTranslate.enToRuDrizzle.get(description);
+            case "Snow" -> weatherTranslate.enToRuSnow.get(description);
+            case "Rain" -> weatherTranslate.enToRuRain.get(description);
+            case "Atmosphere" -> weatherTranslate.enToRuAtmosphere.get(description);
+            case "Clear" -> weatherTranslate.enToRuClear.get(description);
+            case "Clouds" -> weatherTranslate.enToRuClouds.get(description);
             default -> "";
         };
     }
