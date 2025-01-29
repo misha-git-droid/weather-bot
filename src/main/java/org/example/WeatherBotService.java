@@ -53,6 +53,7 @@ public class WeatherBotService {
         } catch (Exception e) {
             log.info("Произошла ошибка во время парсинга json в pojo");
             e.printStackTrace();
+            throw new NotFoundCityException("Некорректное название города!");
         }
 
         return weatherNow;

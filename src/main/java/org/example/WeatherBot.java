@@ -41,7 +41,14 @@ public class WeatherBot implements LongPollingSingleThreadUpdateConsumer {
 
             } else if (!messageFromUser.equals("/start")) {
 
-                WeatherNow weatherNow = weatherBotService.getWeatherNow(messageFromUser, WeatherNow.class);
+                WeatherNow weatherNow = null;
+
+                try {
+                    weatherNow = weatherBotService.getWeatherNow(messageFromUser, WeatherNow.class);
+                } catch (NotFoundCityException e) {
+                    weatherBotService.sendMessage(chat_id, e.getMessage());
+                }
+
                 atmosphereService.checkWeatherMain(weatherNow);
                 String emj = EmojiParser.parseToUnicode(emodjiService.getEmodji(weatherNow));
 
